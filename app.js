@@ -6,8 +6,6 @@ const Router = require('koa-router');
 
 const bodyparser = require('koa-bodyparser');
 
-const path = require('path');
-
 //引入配置
 let { appPort,viewsDir,staticDir } = require('./config.js');
 
@@ -25,12 +23,42 @@ render(app, {
   extname: '.html',
   debug: process.env.NODE_ENV !== 'production'
 });
+ 
 
 //Music路由
 const musicRouter = require('./router/MusicRouter.js');
 
 //User路由
 const userRouter = require('./router/userRouter.js');
+
+
+//处理错误
+// const handler = async (ctx, next) => {
+//   try {
+//     await next();
+//   } catch (err) {
+//     ctx.response.status = err.statusCode || err.status || 500;
+//     // ctx.response.body = {
+//     //   message: err.message
+//     // };
+//     throw err;
+//   }
+// };
+
+// 优雅的处理异常
+app.use(async (ctx,next) => {
+    try {
+      //先放行
+      await next();
+    }catch (e) {
+      // 根据之前的
+      // e.code之类的状态码002
+      // console.log(e);
+      ctx.render('error',{msg:'002状态错误，原因是:xxx'})
+    }
+
+
+})
 
 
 //为了staitic有效果，得重写URL
@@ -51,10 +79,14 @@ app.use(require('koa-static')(staticDir));
 app.use(bodyparser());
 
 //处理路由中间件
+app.use(userRouter.routes());
 
 app.use(musicRouter.routes());
 
-app.use(userRouter.routes());
+
+
+//处理405 方法不匹配 和 501 方法未实现
+app.use(userRouter.allowedMethods());
 
 //开启服务器
 app.listen(appPort,()=>{

@@ -23,6 +23,7 @@ db.q = function (sql,params) {
       }
       connection.query(sql,params, function (error, results, fields) {
             console.log(`${sql}=>${params}`);
+            // console.log(results);
              // 释放连接
             connection.release();
               if(err){
