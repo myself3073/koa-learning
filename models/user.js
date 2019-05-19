@@ -3,9 +3,9 @@ const db = require('./db.js');
 
 module.exports = {
 
-	getUsers:async ()=> await db.q('select * from user',[]),
+	getUsers:async ()=> await db.q('select * from users',[]),
 
-	finduserByuserName:async (username) => await db.q('select * from user where username=?',[username]),
+	finduserByuserName:async (username) => await db.q('select * from users where username=?',[username]),
 
-	registerUser:async (...argu) => await db.q('insert into user (username,password,email) values (?,?,?)',argu),	
+	registerUser:async (...argu) => await db.q('insert into users (username,password,email) values (?,?,?)',argu),	
 }

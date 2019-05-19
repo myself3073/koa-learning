@@ -6,8 +6,10 @@ const Router = require('koa-router');
 
 const bodyparser = require('koa-bodyparser');
 
+const formidable = require('koa-formidable');
+ 
 //引入配置
-let { appPort,viewsDir,staticDir } = require('./config.js');
+let { appPort,viewsDir,staticDir,uploadDir } = require('./config.js');
 
 //创建服务
 const app = new Koa();
@@ -46,37 +48,22 @@ const userRouter = require('./router/userRouter.js');
 // };
 
 // 优雅的处理异常
-app.use(async (ctx,next) => {
-    try {
-      //先放行
-      await next();
-    }catch (e) {
-      // 根据之前的
-      // e.code之类的状态码002
-      // console.log(e);
-      ctx.render('error',{msg:'002状态错误，原因是:xxx'})
-    }
+app.use(require('./middleware/error.js'));
 
+//在路由之前 解析请求体数据
+// app.use(bodyparser());
 
-})
+// 处理上传的文件
+app.use(formidable({
+  uploadDir:uploadDir,
+  keepExtensions:true
+}));
 
-
-//为了staitic有效果，得重写URL
-app.use(async(ctx,next)=>{
-
-	if(ctx.request.url.startsWith('/public')){
-
-		ctx.request.url = ctx.request.url.replace('/public','');
-	}
-
-	await next();
-});
+//为了staitic有效果，得重写URL   重写URL和定向URL的区别？
+app.use(require('./middleware/rewriteUrl.js')(require('./rewriteUrlConfig.js')));
 
 //处理静态资源
 app.use(require('koa-static')(staticDir));
-
-//在路由之前 解析请求体数据
-app.use(bodyparser());
 
 //处理路由中间件
 app.use(userRouter.routes());

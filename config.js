@@ -8,6 +8,7 @@ module.exports = {
 			  host            : 'localhost',
 			  user            : 'root',
 			  password        : 'op110120',
-			  database        : 'users'
+			  database        : 'node_music'
 			},
+	uploadDir:path.join(__dirname, '/public/files'),
 }

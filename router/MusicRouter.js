@@ -3,16 +3,9 @@ const Router = require('koa-router');
 
 const MusicRoute = new Router();
 
-MusicRoute.get('/',async (ctx)=>{
+const musicModle = require('../controllers/music.js');
 
-	ctx.render('index');
-
-})
-.get('/music/add-music',async (ctx)=>{
-
-	ctx.render('add')
-
-})
+MusicRoute.post('/music/add-music',musicModle.addMusic)
 .get('/music/edit-music',async (ctx)=>{
 
 	ctx.render('edit');
