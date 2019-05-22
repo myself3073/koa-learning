@@ -4,11 +4,8 @@
 <!-- 把坑填上 -->
 {{block 'content'}}
     <div class="container">
-        <form id="form" method="post" action="/">
-            <div class="form-group">
-                <label for="">歌曲编号</label>
-                <input type="text" name="id" class="form-control" placeholder="请输入歌曲编号">
-            </div>
+        <form id="form" method="" action="">
+                <input type="hidden" name="id" class="form-control" value>
             <div class="form-group">
                 <label for="">歌曲标题</label>
                 <input type="text" name="title" class="form-control" placeholder="请输入歌曲标题">
@@ -26,7 +23,17 @@
                 <input type="file" name="file">
                 <p class="help-block">请上传歌曲文件.</p>
             </div>
+            <div class="form-group">
+                <label for="">歌曲文件</label>
+                <input type="file" name="filelrc">
+                <p class="help-block">请上传歌曲文件.</p>
+            </div>
             <button type="submit" class="btn btn-success">点击添加</button>
         </form>
     </div>
+    <script src="../tool/formDataUpLoad.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        // 处理表单数据 传Id
+        formDataUpLoad('form');
+    </script>
 {{/block}}

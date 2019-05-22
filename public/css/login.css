@@ -242,3 +242,8 @@ body {
         padding: 0 10px !important;
     }
 }
+
+
+.aw-top-menu-wrap .container .aw-user-nav{
+    display:none !important;
+}

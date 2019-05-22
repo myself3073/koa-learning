@@ -6,7 +6,7 @@
 
     <style type="text/css">
          #pwd-level div {
-        height: 30px;
+        height: 10px;
         width: 30px;
         display: inline-block;
         float: left;
@@ -32,24 +32,25 @@
                         <i class="icon icon-delete"></i> <em></em>
                     </li>
                     <li>
-                        <input class="aw-register-name form-control" type="text" name="username" placeholder="用户名" value="" />
+                        <input class="aw-register-name form-control" type="text" name="username" placeholder="用户名" value="" id="username"/>
                     </li>
                     <li>
                         <input class="aw-register-email form-control" type="text" placeholder="邮箱" name="email" value="" />
                     </li>
                     <li>
-                        <input class="aw-register-pwd form-control" type="password" name="password" placeholder="密码"  />
+                        <input class="aw-register-pwd form-control" type="password" name="password" placeholder="密码"  id="password"/>
                     </li>
                     <div id='pwd-level'>
                         <span>密码强度:</span>
                         <div></div>
                         <div></div>
                         <div></div>
+                        <div></div>
                     </div>
                     <hr/>
                     <li class="aw-register-verify">
-                        <img class="pull-right" width="120" src="">
-                        <input type="text" class="form-control" name="vcode" placeholder="验证码" />
+                        <img class="pull-right" width="120" src="http://127.0.0.1:8888/user/get-pic" onclick="this.src='/user/get-pic?'+ Date.now() ">
+                        <input type="text" class="form-control" name="v_code" placeholder="验证码" />
                     </li>
                     <li class="last">
                         <label>
@@ -68,4 +69,124 @@
             </form>
         </div>
     </div>
+
+    <script  type="text/javascript">
+        
+        //用keyup事件：没按一个就发送一个请求，浪费资源  （另一方法：绑定onchange事件）
+        // $('#username').on('keyup',function(e) {
+        //     let username = $(this).val();
+        //     $.ajax({
+        //         url:'/user/check-username',
+        //         method:"POST",
+        //         //content-type默认是键值对
+        //         data:'username='+username,
+        //         datatype:'JSON',
+        //         success:function (data) {
+
+        //             if(data.code === '001'){
+        //                 alert("可以注册");
+        //             }else{
+        //                 alert("用户名")
+        //             }
+        //         }
+        //     })
+        // })
+        //改进：// 节流（延迟1秒发请求）
+        var checkUsername = (function(){
+            var timer;
+            var prevUsername;
+            // 内部函数对外部函数变量的使用，这个是闭包的典型应用，优点: 避免了全局变量
+            return function() {
+                var that = this;
+                // 清空之前的任务 (记住用setTimeout和setInterval之前要清空)
+                clearTimeout(timer);
+                timer = setTimeout(function(){
+                    let username = $(that).val();
+                    if(prevUsername === username || username ==''){
+                        return;
+                    }
+                    $.ajax({
+                        url:'/user/check-username',
+                        method:"POST",
+                        //content-type默认是键值对
+                        data:'username='+username,
+                        datatype:'JSON',
+                        success:function (data) {
+                            if(data.code === '001'){
+                                confirm("可以注册");
+                            }else{
+                                confirm("用户名已存在")
+                            }
+                        }
+                    });
+                    prevUsername = username;
+                },800)
+            
+            }
+        })();
+        $('#username').on('keyup',checkUsername);
+
+        //密码强度  
+        var strongPsw = (function(){
+            //验证密码强度
+            var regex1 = /\W/;
+            var regex2 = /[A-Z]/;
+            var regex3 = /[a-z]/
+            var regex4 = /\d/;
+
+            var temp;
+
+            return function(password){
+                temp=0;
+                if(regex1.test(password)) temp++;
+                if(regex2.test(password)) temp++;
+                if(regex3.test(password)) temp++;
+                if(regex4.test(password)) temp++;
+                return temp;
+            }
+        })();
+
+        $('#password').on('keyup',function(){
+
+            var password = $(this).val();
+            var result = strongPsw(password);
+            var colorArr = ['greenyellow','blue','hotpink','red'];
+            var spanElems = $('#pwd-level').find('div');
+
+           for (var i = 0; i < spanElems.length; i++) {
+               spanElems[i].style.backgroundColor = '';
+           }
+
+           for (var j = 0; j < result; j++) {
+               spanElems[j].style.backgroundColor = colorArr[j];
+           }
+
+
+        });
+
+        //提交表单注册
+        $('#register_form').on('submit',function(e){
+
+            // 禁止默认提交事件
+            e.preventDefault();
+            var formData = $(this).serialize(); // username=xxx&email=xxx
+            $.ajax({
+                url:'/user/do-register',
+                method:'POST',
+                data:formData,
+                datatype:'JSON',
+                success:function(data){
+                    if(data.code === '001'){
+                        if(confirm(data.msg+'是否去登录？')){
+                            window.location = '/user/login'
+                        }
+                    }else{
+                        alert('注册失败：' + data.msg)
+                    }
+                }
+            })
+        })
+
+
+    </script>
 {{/block}}
